@@ -19,7 +19,7 @@ const UserAccountNav: FC<UserAccountNavProps> = ({user}) => {
         className='h-8 w-8'
 
          user={
-            {
+            { 
             name: user.name || null,
             image: user.image ||null,
         }
