@@ -46,9 +46,16 @@ const Page = () => {
                 return loginToast()
             }
         }
-    }
-
-  });
+        toast({
+            title:'There was an error', 
+            description : 'Could not create subreddit.',
+            variant:'destructive',
+        })
+    },
+    onSuccess:(data) => {
+        router.push(`/r/${data}`)
+    },
+  })
 
   return (
     <div className="container flex items-center h-full max-w-3xl mx-auto">
