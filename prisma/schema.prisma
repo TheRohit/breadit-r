@@ -44,7 +44,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   createdSubreddits Subreddit[] @relation("CreatedBy")
-  
+
   username String? @unique
 
   image        String?
@@ -54,7 +54,6 @@ model User {
   Comment      Comment[]
   CommentVote  CommentVote[]
   Vote         Vote[]
-  
   Subscription Subscription[]
 }
 
@@ -96,7 +95,7 @@ model Post {
   authorId String
 
   comments Comment[]
-  Vote     Vote[]
+  votes     Vote[]
 }
 
 model Comment {
