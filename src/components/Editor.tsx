@@ -176,10 +176,12 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
       title: data.title,
       content: blocks,
       subredditId,
-    };
+    }
+    createPost(payload);
   }
 
-  createPost(payload);
+
+  
 
   if (!isMounted) {
     return null;
