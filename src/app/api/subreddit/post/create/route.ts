@@ -20,7 +20,7 @@ export async function POST(req: Request){
                 userId:session.user.id,
             },
         })
-        if(subscriptionExists){
+        if(!subscriptionExists){
             return new Response('Subscribe to post.',{
                 status:400,
             })
