@@ -1,11 +1,16 @@
 "use client";
 
-import { FC, useCallback, useRef } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useForm } from "react-hook-form";
 import { PostCreationRequest, PostValidator } from "@/lib/validators/post";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type EditorJS from "@editorjs/editorjs";
+import { uploadFiles } from "@/lib/uploadthing";
+import { toast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { usePathname, useRouter } from "next/navigation";
 
 interface EditorProps {
   subredditId: string;
@@ -26,7 +31,12 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
   });
 
   const ref = useRef<EditorJS>();
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const _titleRef = useRef<HTMLTextAreaElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
 
+  //editorJS plugins
   const initializeEditor = useCallback(async () => {
     const EditorJS = (await import("@editorjs/editorjs")).default;
     const Header = (await import("@editorjs/header")).default;
@@ -38,6 +48,7 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
     const InlineCode = (await import("@editorjs/inline-code")).default;
     const ImageTool = (await import("@editorjs/image")).default;
 
+    //properties to pass through the editorJS
     if (!ref.current) {
       const editor = new EditorJS({
         holder: "editor",
@@ -55,19 +66,148 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
               endpoint: "/api/link",
             },
           },
+
+          //using uploadThing
+          image: {
+            class: ImageTool,
+            config: {
+              uploader: {
+                async uploadByFile(file: File) {
+                  const [res] = await uploadFiles([file], "imageUploader");
+                  return {
+                    success: 1,
+                    file: {
+                      url: res.fileUrl,
+                    },
+                  };
+                },
+              },
+            },
+          },
+          list: List,
+          code: Code,
+          InlineCode: InlineCode,
+          table: Table,
+          embed: Embed,
         },
       });
     }
   }, []);
 
+  //to check if editor is mounted
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsMounted(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(errors).length) {
+      for (const [_key, value] of Object.entries(errors)) {
+        toast({
+          title: "Something went wrong",
+          description: (value as { message: string }).message,
+          variant: "destructive",
+        });
+      }
+    }
+  }, [errors]);
+  //to focus on the title
+  useEffect(() => {
+    const init = async () => {
+      await initializeEditor();
+      setTimeout(() => {
+        //set focus to title
+        _titleRef.current?.focus();
+      }, 0);
+    };
+
+    if (isMounted) {
+      init();
+      return () => {
+        //uninitilize the editor
+        ref.current?.destroy();
+        ref.current = undefined;
+      };
+    }
+  }, [isMounted, initializeEditor]);
+
+  //tanstack query to send api request
+  const { mutate: createPost } = useMutation({
+    mutationFn: async ({
+      title,
+      content,
+      subredditId,
+    }: PostCreationRequest) => {
+      const payload: PostCreationRequest = {
+        subredditId,
+        title,
+        content,
+      };
+      const { data } = await axios.post("/api/subreddit/post/create", payload);
+      return data;
+    },
+    onError: () => {
+      return toast({
+        title: "Something went wrong",
+        description: "Your post was not published, please try again later",
+        variant: "destructive",
+      });
+    },
+    onSuccess: () => {
+      // r/mycommunity/submit --> into r/mycommunity
+      const newPathName = pathname.split("/").slice(0, -1).join("/");
+      router.push(newPathName);
+
+      //clear cache so that updated post shows up
+      router.refresh();
+
+      return toast({
+        description: "Your post has been published.",
+      });
+    },
+  });
+
+  async function onSubmit(data: PostCreationRequest) {
+    const blocks = await ref.current?.save();
+
+    const payload: PostCreationRequest = {
+      title: data.title,
+      content: blocks,
+      subredditId,
+    };
+  }
+
+  createPost(payload);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  // destructuring the hook to use for form and title
+  const { ref: titleRef, ...rest } = register("title");
+
   return (
     <div className="w-full p-4 bg-zinc-50 rounded-lg border border-zinc-200 ">
-      <form id="subreddit-post-form" className="w-fit" onSubmit={() => {}}>
+      <form
+        id="subreddit-post-form"
+        className="w-fit"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <div className="prose prose-stone dark:prose-invert">
           <TextareaAutosize
+            ref={(e) => {
+              titleRef(e);
+              //@ts-ignore
+              // using the same hook for form and to focus on title as well
+              _titleRef.current = e;
+            }}
+            {...rest}
             placeholder="Title"
             className="w-full resize-none appearance-none overflow-hidden bg-transparent text-5xl font-bold focus:outline-none"
           />
+          <div id="editor" className="min-h-[500px]" />
         </div>
       </form>
     </div>
