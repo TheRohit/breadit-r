@@ -11,7 +11,7 @@ import Post from "./Post";
 
 interface PostFeedProps {
   initialPosts: ExtendedPost[];
-  subredditName?: string;
+  subredditName?: string; 
 }
 
 const PostFeed: FC<PostFeedProps> = ({ initialPosts, subredditName }) => {
@@ -83,6 +83,7 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, subredditName }) => {
         } else {
           return (
             <Post
+            key={post.id}
               currentVote={currentVote}
               votesAmt={votesAmt}
               commentAmt={post.comments.length}

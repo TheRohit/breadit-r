@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate",
-    "tstart": "next dev --turbo"
+    "postinstall": "prisma generate"
+    
   },
   "dependencies": {
     "@editorjs/code": "^2.8.0",
