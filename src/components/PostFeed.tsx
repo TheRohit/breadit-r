@@ -1,7 +1,7 @@
 "use client";
 
 import { ExtendedPost } from "@/types/db";
-import { FC, useRef } from "react";
+import { FC, useEffect, useRef } from "react";
 import { useIntersection } from "@mantine/hooks";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { INFINITE_SCROLLING_PAGINATION_RESULTS } from "@/config";
@@ -46,6 +46,13 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, subredditName }) => {
     }
   );
 
+  useEffect(() => {
+    //last post ref is given
+    if (entry?.isIntersecting) {
+      fetchNextPage();
+    }
+  }, [entry, fetchNextPage]);
+
   const posts = data?.pages.flatMap((page) => page) ?? initialPosts;
 
   return (
@@ -64,11 +71,25 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, subredditName }) => {
         if (index === posts.length - 1) {
           return (
             <li key={post.id} ref={ref}>
-              <Post currentVote={currentVote} votesAmt={votesAmt} commentAmt={post.comments.length} subredditName={post.subreddit.name} post={post}/>
+              <Post
+                currentVote={currentVote}
+                votesAmt={votesAmt}
+                commentAmt={post.comments.length}
+                subredditName={post.subreddit.name}
+                post={post}
+              />
             </li>
-          ); 
+          );
         } else {
-          return <Post currentVote={currentVote} votesAmt={votesAmt} commentAmt={post.comments.length} subredditName={post.subreddit.name} post={post}/>
+          return (
+            <Post
+              currentVote={currentVote}
+              votesAmt={votesAmt}
+              commentAmt={post.comments.length}
+              subredditName={post.subreddit.name}
+              post={post}
+            />
+          );
         }
       })}
     </ul>
