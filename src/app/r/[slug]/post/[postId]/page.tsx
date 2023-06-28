@@ -1,5 +1,4 @@
 import CommentsSection from "@/components/CommentsSection";
-import DeletePost from "@/components/DeletePost";
 import EditorOutput from "@/components/EditorOutput";
 import PostVoteServer from "@/components/post-vote/PostVoteServer";
 import { Button, buttonVariants } from "@/components/ui/Button";
