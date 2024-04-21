@@ -16,20 +16,6 @@ export function CSPostHogProvider({
   auth,
 }: {
   children: ReactNode;
-  auth: any;
-}) {
-  return (
-    <PostHogProvider client={posthog}>
-      <PostHogAuthWrapper auth={auth}>{children}</PostHogAuthWrapper>
-    </PostHogProvider>
-  );
-}
-
-function PostHogAuthWrapper({
-  children,
-  auth,
-}: {
-  children: React.ReactNode;
   auth: Session;
 }) {
   useEffect(() => {
@@ -42,6 +28,5 @@ function PostHogAuthWrapper({
       posthog.reset();
     }
   }, [auth]);
-
-  return children;
+  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }
