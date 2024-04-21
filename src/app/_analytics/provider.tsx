@@ -16,15 +16,15 @@ export function CSPostHogProvider({
   auth,
 }: {
   children: ReactNode;
-  auth: Session;
+  auth: Session | null;
 }) {
   useEffect(() => {
-    if (auth.user) {
+    if (auth?.user) {
       posthog.identify(auth.user.id, {
         email: auth.user.email,
         name: auth.user.username,
       });
-    } else if (auth.expires) {
+    } else if (auth?.expires) {
       posthog.reset();
     }
   }, [auth]);
