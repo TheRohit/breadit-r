@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { format } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { buttonVariants } from '@/components/ui/Button';
+import { buttonVariants } from "@/components/ui/Button";
 import ToFeedButton from "@/components/ToFeedButton";
 
 const Layout = async ({
@@ -89,20 +89,21 @@ const Layout = async ({
 
               {subreddit.creatorId !== session?.user.id ? (
                 <SubscribeLeaveToggle
-                isSubscribed={isSubscribed}
+                  isSubscribed={isSubscribed}
                   subredditId={subreddit.id}
                   subredditName={subreddit.name}
                 />
-
               ) : null}
 
-              <Link className={buttonVariants({
-                variant:'outline',
-                className:'w-full mb-6'
-
-              })}
-              href={`r/${slug}/submit`}
-              >Create Post</Link>
+              <Link
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "w-full mb-6",
+                })}
+                href={`r/${slug}/submit`}
+              >
+                Create Post
+              </Link>
             </dl>
           </div>
         </div>

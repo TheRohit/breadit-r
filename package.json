@@ -54,6 +54,7 @@
     "next-auth": "^4.22.1",
     "npx": "^10.2.2",
     "postcss": "8.4.23",
+    "posthog-js": "^1.128.1",
     "prisma": "^4.14.1",
     "react": "latest",
     "react-dom": "latest",
